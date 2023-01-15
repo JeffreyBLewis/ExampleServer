@@ -5,7 +5,7 @@ post_result <- function(id = paste0("Student_",
                                         collapse = "")),
                          example = "eg00_toy_example",
                          result,
-                         url = "http://127.0.0.1:4567") {
+                         url = the_url) {
     pl <- list(id = id,
                payload = result,
                eg = "eg00_toy_example")
