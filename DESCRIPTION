@@ -18,5 +18,6 @@ Imports:
 	jsonlite (>= 1.8.0),
 	plotly (>= 4.10.0),
 	httr (>= 1.4.3),
-	purrr (>= 0.3.4)
+	purrr (>= 0.3.4),
+	DT (>= 0.23)
  

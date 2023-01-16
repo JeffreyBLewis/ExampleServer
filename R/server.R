@@ -1,3 +1,9 @@
+eg_list <- function() {
+  ls.str("package:ExampleServer") %>%
+    as.character() %>%
+    str_subset("^eg\\d{2}\\_")
+  }
+
 #' Launch example server
 #'
 #` @port port number for serve
@@ -7,17 +13,26 @@
 #' @export
 launch_server <- function(port = 4567,
                           title = "ps200b: Example server",
-                          eg_str = "eg00_estimating_a_mean",
+                          eg_str = "eg00_estimating_a_mean_10",
                           ...) {
 
   ## Setup: Get example and associated data
   datafile <- tempfile(fileext = "json")
   jsonlite::write_json(list(), datafile)
+
+  # Using these global variables make data download work...
   eg <- eval(str2lang(eg_str))
   data <- eg$get_data()
 
   ## Handle requests for data and submission of results
   req_handler <- function(req, response) {
+
+    ## Pass through AJAX call made by DT
+    if (!is.na(req$HEADERS['x-requested-with']) &
+        req$HEADERS["x-requested-with"] == "XMLHttpRequest") {
+      return(response)
+    }
+
     ## Handle download of (over-sampled data) request
     if (stringr::str_detect(req$PATH_INFO,
                             paste0("/", eg_str, ".Rdata$"))) {
@@ -37,7 +52,7 @@ launch_server <- function(port = 4567,
       print("Received post...")
       pdata <- req$rook.input$read(1e5)
       pdata <- jsonlite::fromJSON(rawToChar(pdata))
-      if (is.null(pdata$id)) {
+      if (is.null(pdata$payload) || is.null(pdata$id)) {
         return(response)
       } else {
         print("Parsing result post..")
@@ -66,12 +81,15 @@ launch_server <- function(port = 4567,
         actionLink("clear", "Clear responses"),
         br(),
         br(),
-        textOutput("count")
+        textOutput("count"),
+        br(),
+        selectInput("example", "Select example:", eg_list()),
       ),
       mainPanel(
         tabsetPanel(type="tab",
-                    tabPanel("Data", tableOutput('data')),
-                    tabPanel("Estimates", tableOutput('table')),
+                    tabPanel("Data",
+                             DT::dataTableOutput('data')),
+                    tabPanel("Estimates", DT::dataTableOutput('table')),
                     tabPanel("Summary", tableOutput('summary')),
                     tabPanel("Plot", plotlyOutput('plot')))
       )
@@ -79,6 +97,10 @@ launch_server <- function(port = 4567,
   )
 
   server <- function(input, output, session) {
+    egp <- reactiveValues( eg_str = eg_str,
+                           eg = eval(str2lang(eg_str)),
+                           data = data)
+
     ## Add bots (simulated student responses...)
     observeEvent(input$add_bots, {
       json <- readr::read_file(datafile) %>%
@@ -99,21 +121,32 @@ launch_server <- function(port = 4567,
         cat("[]", file = datafile)
     })
 
+    # Switch examples
+    observeEvent(input$example, {
+      cat(sprintf("Switching to %s...\n", input$example))
+      eg_str <<- egp$eg_str <- input$example
+      eg <<- egp$eg <- eval(str2lang(eg_str))
+      data <<- egp$data <- eg$get_data()
+      cat("[]", file = datafile)
+    })
+
     # Poll JSON file for new responses
     results_data <- reactiveFileReader(1000, session, datafile, function(x) {
         eg$parse_results(x)
     })
 
     # Generate page content to flow into UI
-    output$title <- renderText(eg$title)
-    output$eg_str <- renderText(sprintf("(%s)", eg_str))
-    output$description <- renderText(eg$description)
-    output$data <- renderTable(data %>%
-                                 mutate(`Obs no.` = 1:dplyr::n()) %>%
-                                 select(`Obs no.`, everything()))
-    output$table <- renderTable(eg$make_table(results_data()))
-    output$plot <- renderPlotly(eg$make_plot(results_data()))
-    output$summary <- renderTable(eg$make_summary(results_data()))
+    output$title <- renderText(egp$eg$title)
+    output$eg_str <- renderText(sprintf("(%s)", egp$eg_str))
+    output$description <- renderText(egp$eg$description)
+    output$data <- DT::renderDataTable(egp$data %>%
+                                         mutate(across(where(is.numeric), round, 3)),
+                                       options = list(dom = 'tp'))
+    output$table <- DT::renderDataTable(egp$eg$make_table(results_data()) %>%
+                                          mutate(across(where(is.numeric), round, 3)),
+                                        options = list(dom = 'tp'))
+    output$plot <- renderPlotly(egp$eg$make_plot(results_data()))
+    output$summary <- renderTable(egp$eg$make_summary(results_data()))
     output$count <- renderText(sprintf("Estimates reported: %i", NROW(results_data())))
   }
 
