@@ -11,7 +11,7 @@ post_result <- function(id = paste0("Student_",
                eg = "eg00_toy_example")
     res <- httr::POST(url, body = pl, encode = "json")
     if (res$status_code != 200) {
-      raise(sprintf("Failed to post to server (Returned status code %s).",
+      error(sprintf("Failed to post to server (Returned status code %s).",
                     res$status_code))
     }
     res
