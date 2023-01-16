@@ -2,19 +2,26 @@
 #' @import ggplot2
 #' @importFrom plotly ggplotly
 #' @export
-eg00_toy_example <- list(
+eg00_estimating_a_mean <- list(
+  seed_eg = function() set.seed(123),
   title = "Estimating a mean",
   description = "Data are 1000 draws from a uniform distribution on the zero-ten interval. Report back your estimate of the
   mean of the population mean from which the data were drawn using a random subsample of 10 cases.",
+
+  # Function to load data
   get_data = function(){data.frame(y=runif(10000, 0, 10))},
+
+  # Function to create bot respondent
   sim_bot = function(data){
     jsonlite::toJSON(
       list(id = paste0("Bot_",
                        paste0(sample(LETTERS, 4, replace = TRUE), collapse = "")),
-           payload = list(mean=mean(sample(data$y, 10, replace=TRUE))),
-           eg = "eg00_toy_example")
+           payload = data.frame(mean=mean(sample(data$y, 10, replace=TRUE))),
+           eg = "eg00_estimating_a_mean")
     )
   },
+
+  # Function to parse the submitted results
   parse_results = function(results_json) {
     rawdata <- jsonlite::fromJSON(results_json, flatten=TRUE)
     if (class(rawdata) == "list") {
@@ -24,11 +31,12 @@ eg00_toy_example <- list(
         eg = character(0))
     } else {
       res <- rawdata %>%
-        rename("mean" = "payload.mean") %>%
         tidyr::unnest(cols=everything())
     }
     res
   },
+
+  # Functions to make result displays
   make_table = function(results_data) results_data,
   make_summary = function(results_data){
                             data.frame(
@@ -48,22 +56,23 @@ eg00_toy_example <- list(
       geom_histogram(show.legend=FALSE) +
       theme_minimal()
     ggplotly(gg, tooltip = "id")
-  },
-  seed_eg = function() {set.seed(123)}
+  }
 )
 
-test_eg00_toy_example <- function() {
-  eg00_toy_example$seed_eg()
-  dat <- eg00_toy_example$get_data()
+#' @export
+test_eg <- function(eg = eg00_estimating_a_mean) {
+  eg$seed_eg()
+  dat <- eg$get_data()
   json <- sprintf("[%s]",
-            paste0(
-              purrr::map_chr(1:1000,
-                function(z) eg00_toy_example$sim_bot(dat)),
-                collapse=","))
-  rd<- eg00_toy_example$parse_results(json)
-  print(eg00_toy_example$make_summary(rd))
-  print( eg00_toy_example$make_plot(rd) )
+                  paste0(
+                    purrr::map_chr(1:1000,
+                                   function(z) eg$sim_bot(dat)),
+                    collapse=","))
+  rd <- eg$parse_results(json)
+  print(glimpse(rd))
+  print(eg$make_summary(rd))
+  print( eg$make_plot(rd) )
   rd
 }
 
-#z <- test_eg00_toy_example()
+#rd <- test_eg()

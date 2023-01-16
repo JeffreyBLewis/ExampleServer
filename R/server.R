@@ -7,7 +7,7 @@
 #' @export
 launch_server <- function(port = 4567,
                           title = "ps200b: Example server",
-                          eg_str = "eg00_toy_example",
+                          eg_str = "eg00_estimating_a_mean",
                           ...) {
 
   ## Setup: Get example and associated data
