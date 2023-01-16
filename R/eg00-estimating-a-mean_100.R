@@ -6,7 +6,7 @@ eg00_estimating_a_mean_100 <- list(
   seed_eg = function() set.seed(123),
   title = "Estimating a mean",
   description = "Data are 1000 draws from a uniform distribution on the zero-ten interval. Report back your estimate of the
-  mean of the population mean from which the data were drawn using a random subsample of 100 cases.",
+  the mean of the population from which the data were drawn using a random subsample of 100 cases.",
 
   # Function to load data
   get_data = function(){data.frame(y=runif(1000, 0, 10))},

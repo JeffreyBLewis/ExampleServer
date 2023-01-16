@@ -22,6 +22,7 @@ launch_server <- function(port = 4567,
 
   # Using these global variables make data download work...
   eg <- eval(str2lang(eg_str))
+  eg$seed_eg()
   data <- eg$get_data()
 
   ## Handle requests for data and submission of results
@@ -127,6 +128,7 @@ launch_server <- function(port = 4567,
       eg_str <<- egp$eg_str <- input$example
       eg <<- egp$eg <- eval(str2lang(eg_str))
       data <<- egp$data <- eg$get_data()
+      eg$seed_eg()
       cat("[]", file = datafile)
     })
 
@@ -151,7 +153,7 @@ launch_server <- function(port = 4567,
   }
 
   shinyApp(ui, server,
-         options = list(port = port, ...))
+           options = list(port = port, ...))
 }
 
 
