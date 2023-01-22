@@ -111,7 +111,7 @@ launch_server <- function(port = 4567,
                    json,
                    ifelse(nchar(json)==0, "", ","),
                    paste0(
-                     purrr::map_chr(1:500,
+                     purrr::map_chr(1:100,
                                   function(z) eg$sim_bot(data)),
                      collapse=","))),
           file = datafile)
