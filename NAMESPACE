@@ -2,7 +2,7 @@
 
 export(eg00_estimating_a_mean_10)
 export(eg00_estimating_a_mean_100)
-export(eg01_contructing_a_confidence_interval)
+export(eg01_constructing_a_confidence_interval)
 export(get_eg_data)
 export(launch_server)
 export(post_result)

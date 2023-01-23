@@ -2,7 +2,7 @@
 #' @import ggplot2
 #' @importFrom plotly ggplotly
 #' @export
-eg01_contructing_a_confidence_interval <- list(
+eg01_constructing_a_confidence_interval <- list(
   seed_eg = function() set.seed(1234),
   title = "Calculating an average treatment effect confidence interval",
   description = "Estimate one effect from the poverty relief program
@@ -106,7 +106,7 @@ eg01_contructing_a_confidence_interval <- list(
 )
 
 #' @export
-test_eg01 <- function(eg = eg01_contructing_a_confidence_interval) {
+test_eg01 <- function(eg = eg01_constructing_a_confidence_interval) {
  # eg$seed_eg()
   dat <- eg$get_data()
   print( eg$sim_bot(dat) )
