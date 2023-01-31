@@ -2,6 +2,7 @@
 #' @import ggplot2
 #' @importFrom plotly ggplotly
 #' @export
+
 eg01_constructing_a_confidence_interval <- list(
   seed_eg = function() set.seed(1234),
   title = "Calculating a simple hypothesis test",
@@ -127,4 +128,4 @@ test_eg02 <- function(eg = eg01_constructing_a_confidence_interval) {
   rd
 }
 
-rd <- test_eg02()
+#rd <- test_eg02()
