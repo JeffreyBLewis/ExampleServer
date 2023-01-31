@@ -3,7 +3,7 @@
 #' @importFrom plotly ggplotly
 #' @export
 
-eg01_constructing_a_confidence_interval <- list(
+eg02_a_simple_hypothesis_test <- list(
   seed_eg = function() set.seed(1234),
   title = "Calculating a simple hypothesis test",
   description = "Construct a simple hypothesis regarding one effect from the poverty relief program
